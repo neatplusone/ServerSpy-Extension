@@ -2,13 +2,30 @@
 
 const $ = (id) => document.getElementById(id);
 
-const LOOKUPS = [
-  ["ipinfo.io", (ip) => `https://ipinfo.io/${ip}`],
-  ["infobyip.com", (ip) => `https://www.infobyip.com/ip-${ip}.html`],
-  ["whatismyipaddress.com", (ip) => `https://whatismyipaddress.com/ip/${ip}`],
-  ["Censys", (ip) => `https://search.censys.io/hosts/${ip}`],
-  ["Shodan", (ip) => `https://www.shodan.io/host/${ip}`],
-];
+const LOOKUPS = {
+  "Info": [
+    ["ipinfo.io", (ip) => `https://ipinfo.io/${ip}`],
+    ["infobyip.com", (ip) => `https://www.infobyip.com/ip-${ip}.html`],
+    ["whatismyipaddress.com", (ip) => `https://whatismyipaddress.com/ip/${ip}`],
+  ],
+  "Threat intel": [
+    ["VirusTotal", (ip) => `https://www.virustotal.com/gui/ip-address/${ip}`],
+    ["AbuseIPDB", (ip) => `https://www.abuseipdb.com/check/${ip}`],
+    ["GreyNoise", (ip) => `https://viz.greynoise.io/ips/${ip}`],
+    ["AlienVault OTX", (ip) => `https://otx.alienvault.com/indicator/ip/${ip}`],
+    ["Talos", (ip) => `https://talosintelligence.com/reputation_center/lookup?search=${ip}`],
+  ],
+  "Exposure": [
+    ["Censys", (ip) => `https://search.censys.io/hosts/${ip}`],
+    ["Shodan", (ip) => `https://www.shodan.io/host/${ip}`],
+    ["urlscan.io", (ip) => `https://urlscan.io/search/#ip:${ip}`],
+    ["ViewDNS reverse IP", (ip) => `https://viewdns.info/reverseip/?host=${ip}&t=1`],
+  ],
+  "Network": [
+    ["bgp.he.net", (ip) => `https://bgp.he.net/ip/${ip}`],
+    ["RIPEstat", (ip) => `https://stat.ripe.net/resource/${ip}`],
+  ],
+};
 
 function notice(text) {
   $("notice").textContent = text;
@@ -24,11 +41,17 @@ function render(info) {
   if (info.ip) {
     $("ip").textContent = info.ip;
     $("ip").href = `http://${info.ip.includes(":") ? `[${info.ip}]` : info.ip}/`;
-    for (const [name, url] of LOOKUPS) {
-      const a = Object.assign(document.createElement("a"), {
-        href: url(info.ip), textContent: name, target: "_blank", rel: "noopener noreferrer",
-      });
-      $("lookup-links").append(li(a));
+    for (const [group, links] of Object.entries(LOOKUPS)) {
+      const ul = document.createElement("ul");
+      for (const [name, url] of links) {
+        const a = Object.assign(document.createElement("a"), {
+          href: url(info.ip), textContent: name, target: "_blank", rel: "noopener noreferrer",
+        });
+        ul.append(li(a));
+      }
+      const dd = document.createElement("dd");
+      dd.append(ul);
+      $("lookup-groups").append(Object.assign(document.createElement("dt"), { textContent: group }), dd);
     }
   } else {
     $("ip").replaceWith("unknown (cached response?)");

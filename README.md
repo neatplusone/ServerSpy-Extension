@@ -7,7 +7,7 @@ See the HTTP response headers, server software and IP of the site you're visitin
 
 Manifest V3, no dependencies. Works in Chrome and Firefox 140+.
 
-![server-spy](https://github.com/100apps/gfzj.us/raw/gh-pages/images/server-spy.png)
+![Server Spy popup](preview.png)
 
 ## Install
 

@@ -22,9 +22,7 @@ On Firefox, if the popup asks for access to all sites, grant it (MV3 makes host 
 - Firefox: `about:debugging` → This Firefox → Load Temporary Add-on → `manifest.json`.
 
 ```bash
-npx web-ext lint     # check the manifest and code
-npx web-ext build    # zip into web-ext-artifacts/
-WEB_EXT_API_KEY=... WEB_EXT_API_SECRET=... ./build.sh   # sign for AMO
+./build.sh   # lint, then zip into web-ext-artifacts/ for upload
 ```
 
 Originally by [100apps](https://github.com/100apps) ([blog post](http://www.gfzj.us/2016/10/01/publish-firefox-chrome-webextension.html)).

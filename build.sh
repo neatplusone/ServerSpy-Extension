@@ -1,2 +1,7 @@
 #!/bin/bash
-web-ext sign --api-key=user:5491182:193 --api-secret=fc735c4d36a303d6f1500c725a5c696f4ff16fdd6922e363be11b7fa52e17145 
+# Sign for addons.mozilla.org. Credentials come from the environment:
+#   WEB_EXT_API_KEY=user:... WEB_EXT_API_SECRET=... ./build.sh
+set -euo pipefail
+: "${WEB_EXT_API_KEY:?set WEB_EXT_API_KEY}" "${WEB_EXT_API_SECRET:?set WEB_EXT_API_SECRET}"
+web-ext lint
+web-ext sign --channel=listed --api-key="$WEB_EXT_API_KEY" --api-secret="$WEB_EXT_API_SECRET"

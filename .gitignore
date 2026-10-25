@@ -1,48 +1,7 @@
-#Yii
+web-ext-artifacts/
+*.zip
 *.crx
-ServerSpy.pem
-runtime
-web/ueditor/php/upload
-
-# 操作系统
-__MACOSX
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
+*.pem
+node_modules/
 .DS_Store
-.AppleDouble
-.LSOverride
-._*
-.Spotlight-V100
-.Trashes
-
-# 三方临时
-*.pydevproject
-.project
-.buildpath
-.metadata
-bin/**
-tmp/**
-tmp/**/*
-*.tmp
-*.bak
-*.swp
-*~.nib
-local.properties
-.classpath
-.settings/
-.loadpath
-
-
-# 临时输出
-target/
-out/
-build/
-
-# logs
-/stacktrace.log
-/test/reports
-/logs
-*.log
-*.log.*
+Thumbs.db

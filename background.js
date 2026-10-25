@@ -1,42 +1,42 @@
 "use strict";
-var headers=[];
-var currentHeader={};
 
-function changeHeader(index){
-  currentHeader=headers[index];
-  if(currentHeader){
-    chrome.browserAction.setTitle({title: currentHeader.server});
-    chrome.browserAction.setBadgeText({text: currentHeader.server});
-  }else{
-    currentHeader={};
-  }
+const key = (tabId) => `tab:${tabId}`;
+
+// Short product name for the badge, e.g. "nginx/1.25.3" -> "ngin".
+function badgeText(server) {
+  return server.split(/[\/\s]/)[0].slice(0, 4);
 }
 
+function showBadge(tabId, info) {
+  const title = info.server
+    ? `${info.server}${info.ip ? ` (${info.ip})` : ""}`
+    : info.ip || "Server Spy";
+  chrome.action.setBadgeText({ tabId, text: badgeText(info.server) });
+  chrome.action.setTitle({ tabId, title });
+}
+
+chrome.action.setBadgeBackgroundColor({ color: "#4a5568" });
+
 chrome.webRequest.onCompleted.addListener(
-  function(e){
-    if(e.url.startsWith("chrome-extension://"))return;
-   var header=e.statusLine;
-    var server="";
-    for (var i = 0; i < e.responseHeaders.length; i++) {
-      header+="\n"+e.responseHeaders[i].name+": "+e.responseHeaders[i].value;
-      if (e.responseHeaders[i].name.toLowerCase()=="server") {
-        server=e.responseHeaders[i].value;
-      };
-    };
-    headers[e.tabId]={"header":header,"server":server,"ip":e.ip,"url":e.url};
-    chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
-      if(tabs[0].id==e.tabId){
-        changeHeader(e.tabId);
-      }
-    });
+  (e) => {
+    if (e.tabId < 0) return;
+    const headers = (e.responseHeaders || []).map(({ name, value }) => ({ name, value }));
+    const server = headers.find((h) => h.name.toLowerCase() === "server")?.value || "";
+    const info = { statusLine: e.statusLine, headers, server, ip: e.ip || "", url: e.url, time: Date.now() };
+    chrome.storage.session.set({ [key(e.tabId)]: info });
+    showBadge(e.tabId, info);
   },
-  {
-  urls: ["<all_urls>"],
-  types: ["main_frame"]
-  },
+  { urls: ["<all_urls>"], types: ["main_frame"] },
   ["responseHeaders"]
 );
 
- chrome.tabs.onActivated.addListener(function(tab){
-  changeHeader(tab.tabId);
- }) 
+// Tab-specific badges can be reset when the page commits, so reapply once loaded.
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
+  if (changeInfo.status !== "complete") return;
+  const { [key(tabId)]: info } = await chrome.storage.session.get(key(tabId));
+  if (info) showBadge(tabId, info);
+});
+
+chrome.tabs.onRemoved.addListener((tabId) => {
+  chrome.storage.session.remove(key(tabId));
+});
